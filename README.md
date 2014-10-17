@@ -31,4 +31,4 @@ Result: /Region/UrbMap_SHP.zip
 Converting UrbIS ZIPOINT CU from SHP to GeoJson
 --
 
-  ogr2ogr -where "TYPE=\"CU\"" -f GeoJSON -s_srs "EPSG:31370" -t_srs "WGS84" UrbMap_ZIPOINT_CU.geojson UrbMap_ZIPOINT.shp
+    ogr2ogr -where "TYPE=\"CU\"" -f GeoJSON -s_srs "EPSG:31370" -t_srs "WGS84" UrbMap_ZIPOINT_CU.geojson UrbMap_ZIPOINT.shp
