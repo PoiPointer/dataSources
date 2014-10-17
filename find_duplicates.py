@@ -49,14 +49,23 @@ def print_dict(d):
   for k in keys:
     print k, d[k]
 
+d2 = {}
 
-print '\n\nurbis:'
-
-print_dict(get_urbis_records())
-
-dict_other = {}
-
-for nk in dataset_name_and_property_key[:-1]:
-  print '\n\n' + nk[0] + ':'
+for nk in dataset_name_and_property_key:
   d = get_records(nk)
-  print_dict(d)
+  #print '\n\n' + nk[0] + ':'
+  #print_dict(d)
+  for k,v in d.items():
+    if d2.has_key(k):
+      d2[k].append(v)
+    else:
+      d2[k] = [v]
+
+print 'Duplicate PoiPointer records:'
+
+keys = d2.keys()
+keys.sort()
+for k in keys:
+  vals = d2[k]
+  if len(vals) > 1:
+    print k + ':', ", ".join(vals)
