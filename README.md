@@ -26,3 +26,9 @@ Manual download:
 * http://urbisdownload.gis.irisnet.be/en/download > Conditions of UrbIS use read and accepted > Click on the link(s) below to download the file(s) you asked for
 
 Result: /Region/UrbMap_SHP.zip
+
+
+Converting UrbIS ZIPOINT CU from SHP to GeoJson
+--
+
+  ogr2ogr -where "TYPE=\"CU\"" -f GeoJSON -s_srs "EPSG:31370" -t_srs "WGS84" UrbMap_ZIPOINT_CU.geojson UrbMap_ZIPOINT.shp
