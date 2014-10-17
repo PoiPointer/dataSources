@@ -43,38 +43,10 @@ def get_records(name_and_property_key):
 def get_urbis_records():
   return get_records(dataset_name_and_property_key[-1])
 
-'''
-def get_art_heritage_records(name):
-  filename = name + '.geojson'
-  return get_records_1(filename,'fr_name')
-
-def get_comic_book_route_records(name):
-  filename = name + '.geojson'
-  return get_records_1(filename,'character_author')
-'''
-
 print '\n\nurbis:'
 
 for row in get_urbis_records():
   print row
-
-'''
-for n in dataset_names_other[:-1]:
-  if n.startswith('art-heritage'):
-    rows = get_art_heritage_records(n)
-  elif n.startswith('comic-book-route'):
-    rows = get_comic_book_route_records(n)
-  else:
-    print '\n\n' + n + ':'
-    with open(n + '.geojson') as json_file:
-      json_data = json.load(json_file)
-      rows = []
-      for row in json_data['features']:
-        coords = get_feature_coordinates(row)
-        rows.append( [coords[0], coords[1], row['properties']['fr_name']] )
-      for row in rows:
-        print row
-'''
 
 for nk in dataset_name_and_property_key[:-1]:
   print '\n\n' + nk[0] + ':'
