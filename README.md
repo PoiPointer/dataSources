@@ -16,7 +16,7 @@ Info
 Accessing the UrbIS Zone of Interest Culture Data Set
 --
 
-*Manual download:*
+**Manual download:**
 
 * http://urbisdownload.gis.irisnet.be
 * http://urbisdownload.gis.irisnet.be/en/dimension > 2D > Next
@@ -30,7 +30,7 @@ Result: /Region/UrbMap_SHP.zip
 This returns the UrbIS 'Zone of Interest' layer data set in SHP format.
 
 
-*Web Service:*
+**Web Service:**
 
     http://geoserver.gis.irisnet.be/geoserver/urbis/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=URB_M_ZIPOINT&CQL_FILTER=TYPE=%27CU%27&outputFormat=json
 
