@@ -1,16 +1,27 @@
 PoiPointer Data Sources
 =======================
 
-DataSources
+Data Sources
 --
 * http://opendata.brussels.be/explore/
 * http://cirb.brussels/fr/nos-solutions/urbis-solutions/telechargement
 * http://urbisdownload.gis.irisnet.be
 
 
+Data Sets Used from opendata.brussels.be
+--
+
+* http://opendata.brussels.be/explore/dataset/theatres/?tab=metas
+* http://opendata.brussels.be/explore/dataset/art-heritage-of-regional-roads-monuments/?tab=metas
+* http://opendata.brussels.be/explore/dataset/art-heritage-of-regional-roads-fountains0/?tab=metas
+* http://opendata.brussels.be/explore/dataset/museums0/?tab=metas
+* http://opendata.brussels.be/explore/dataset/cultural-places/?tab=metas
+* http://opendata.brussels.be/explore/dataset/comic-book-route/?tab=metas
+
+
 Info
 --
-* shape -> geojson : http://ben.balter.com/2013/06/26/how-to-convert-shapefiles-to-geojson-for-use-on-github/
+* [shape to geojson conversion](http://ben.balter.com/2013/06/26/how-to-convert-shapefiles-to-geojson-for-use-on-github)
 
 
 Accessing the UrbIS Zone of Interest Culture Data Set
