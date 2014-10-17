@@ -19,8 +19,9 @@ dataset_name_and_property_key = [
   ['urbis_2d_map_zipoint_zones_of_interest_cu_culture','TXT_FRE']
 ]
 
-def get_feature_coordinates(feature):
-  return feature['geometry']['coordinates']
+def get_feature_coordinates_string(feature):
+  coords = feature['geometry']['coordinates']
+  return "{0:6.3f} {1:6.3f}".format(coords[0], coords[1])
 
 def get_record_string(coords,property_value):
   return "{0:6.3f} {1:6.3f} {2}".format(coords[0], coords[1], property_value)
@@ -28,12 +29,11 @@ def get_record_string(coords,property_value):
 def get_records_1(filename,property_key):
   with open(filename) as json_file:
     json_data = json.load(json_file)
-  rows = []
+  records = {}
   for row in json_data['features']:
-    coords = get_feature_coordinates(row)
-    #rows.append( [coords[0], coords[1], row['properties'][property_key]] )
-    rows.append( get_record_string(coords,row['properties'][property_key] ))
-  return rows
+    coords = get_feature_coordinates_string(row)
+    records[coords] = row['properties'][property_key]
+  return records
 
 def get_records(name_and_property_key):
   [name,key]=name_and_property_key
@@ -43,13 +43,20 @@ def get_records(name_and_property_key):
 def get_urbis_records():
   return get_records(dataset_name_and_property_key[-1])
 
+def print_dict(d):
+  keys = d.keys()
+  keys.sort()
+  for k in keys:
+    print k, d[k]
+
+
 print '\n\nurbis:'
 
-for row in get_urbis_records():
-  print row
+print_dict(get_urbis_records())
+
+dict_other = {}
 
 for nk in dataset_name_and_property_key[:-1]:
   print '\n\n' + nk[0] + ':'
-  rows = get_records(nk)
-  for row in rows:
-    print row
+  d = get_records(nk)
+  print_dict(d)
