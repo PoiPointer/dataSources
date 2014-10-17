@@ -21,10 +21,7 @@ dataset_name_and_property_key = [
 
 def get_feature_coordinates_string(feature):
   coords = feature['geometry']['coordinates']
-  return "{0:6.3f} {1:6.3f}".format(coords[0], coords[1])
-
-def get_record_string(coords,property_value):
-  return "{0:6.3f} {1:6.3f} {2}".format(coords[0], coords[1], property_value)
+  return "{0:7.4f} {1:7.4f}".format(coords[0], coords[1])
 
 def get_records_1(filename,property_key):
   with open(filename) as json_file:
