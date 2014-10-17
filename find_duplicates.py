@@ -49,23 +49,30 @@ def print_dict(d):
   for k in keys:
     print k, d[k]
 
-d2 = {}
+def main():
+  "Read all PoiPointer data records and list duplicates"
 
-for nk in dataset_name_and_property_key:
-  d = get_records(nk)
-  #print '\n\n' + nk[0] + ':'
-  #print_dict(d)
-  for k,v in d.items():
-    if d2.has_key(k):
-      d2[k].append(v)
-    else:
-      d2[k] = [v]
+  d2 = {}
 
-print 'Duplicate PoiPointer records:'
+  for nk in dataset_name_and_property_key:
+    d = get_records(nk)
+    #print '\n\n' + nk[0] + ':'
+    #print_dict(d)
+    for k,v in d.items():
+      if d2.has_key(k):
+        d2[k].append(v)
+      else:
+        d2[k] = [v]
 
-keys = d2.keys()
-keys.sort()
-for k in keys:
-  vals = d2[k]
-  if len(vals) > 1:
-    print k + ':', ", ".join(vals)
+  print 'Duplicate PoiPointer records:'
+
+  keys = d2.keys()
+  keys.sort()
+  for k in keys:
+    vals = d2[k]
+    n = len(vals)
+    if 1 < n:
+      print k + ':', n, ", ".join(vals)
+
+if __name__ == "__main__":
+  main()
