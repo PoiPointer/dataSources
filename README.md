@@ -27,6 +27,12 @@ Manual download:
 
 Result: /Region/UrbMap_SHP.zip
 
+Web Service:
+
+    http://geoserver.gis.irisnet.be/geoserver/urbis/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=URB_M_ZIPOINT&CQL_FILTER=TYPE=%27CU%27&outputFormat=json
+
+[Click here to test](http://geoserver.gis.irisnet.be/geoserver/urbis/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=URB_M_ZIPOINT&CQL_FILTER=TYPE=%27CU%27&outputFormat=json)
+
 
 Converting UrbIS ZIPOINT CU from SHP to GeoJson
 --
