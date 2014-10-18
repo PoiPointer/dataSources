@@ -22,7 +22,15 @@ dataset_name_abbreviation_and_property_key = [
   ['urbis_2d_map_zipoint_zones_of_interest_cu_culture', 'urb', 'TXT_FRE']
 ]
 
-def get_feature_coordinates_string(feature,precision):
+def get_data_set_abbreviation( record ):
+  "Extract the data set abbreviation from a record."
+  i = record.index( '{' )
+  j = record.index('}')
+  abbr = record[i+1:j]
+  #print abbr, record
+  return abbr
+
+def get_feature_coordinates_string(feature, precision):
   coords = feature['geometry']['coordinates']
   length = precision + 3
   sformat = '{0}.{1}'.format( length, precision)
@@ -39,7 +47,7 @@ def get_records( name_abbreviation_and_property_key, precision ):
   records = {}
   for row in json_data['features']:
     coords = get_feature_coordinates_string(row,precision)
-    records[coords] = "{0} ({1})".format(
+    records[coords] = "{0} {{{1}}}".format(
       row['properties'][key], abbr)
   return records
 
@@ -76,7 +84,13 @@ def main():
 
   d2 = {}
 
+  nduplicate_coords = 0
+  nduplicate_entries = 0
+  nduplicate_entries_per_data_set = {}
+
   for nk in dataset_name_abbreviation_and_property_key:
+    nduplicate_entries_per_data_set[nk[1]] = 0
+
     d = get_records(nk,options.precision)
 
     if options.list:
@@ -102,8 +116,22 @@ def main():
     vals = d2[k]
     n = len(vals)
     if 1 < n:
+      nduplicate_coords += 1
+      nduplicate_entries += n
+      for v in vals:
+        nduplicate_entries_per_data_set[
+          get_data_set_abbreviation(v)] += 1
       s = "{0}: {1} {2}".format( k, n, ", ".join(vals))
       print s.encode('utf-8')
+
+  if options.list or options.count:
+    print "\n{0} duplicate coordinates with {1} duplicate entries:".format(
+      nduplicate_coords, nduplicate_entries )
+    keys = nduplicate_entries_per_data_set.keys()
+    keys.sort()
+    for k in keys:
+      print "{0:4d} duplicates in {1}".format(
+        nduplicate_entries_per_data_set[k], k )
 
 if __name__ == "__main__":
   main()
