@@ -22,11 +22,15 @@ dataset_name_abbreviation_and_property_key = [
   ['urbis_2d_map_zipoint_zones_of_interest_cu_culture', 'urb', 'TXT_FRE']
 ]
 
-def get_feature_coordinates_string(feature):
+def get_feature_coordinates_string(feature,precision):
   coords = feature['geometry']['coordinates']
-  return "{0:7.3f} {1:7.3f}".format(coords[0], coords[1])
+  length = precision + 3
+  sformat = '{0}.{1}'.format( length, precision)
+  sformat = '{0:' + sformat + 'f} {1:' + sformat + 'f}'
+  #print sformat
+  return sformat.format(coords[0], coords[1])
 
-def get_records( name_abbreviation_and_property_key ):
+def get_records( name_abbreviation_and_property_key, precision ):
   [name,abbr,key]=name_abbreviation_and_property_key
   filename = name + '.geojson'
   #return get_records_1(filename,abbr,key)
@@ -34,7 +38,7 @@ def get_records( name_abbreviation_and_property_key ):
     json_data = json.load(json_file)
   records = {}
   for row in json_data['features']:
-    coords = get_feature_coordinates_string(row)
+    coords = get_feature_coordinates_string(row,precision)
     records[coords] = "{0} ({1})".format(
       row['properties'][key], abbr)
   return records
@@ -54,7 +58,7 @@ def main():
   parser.add_option( '-?', '--question', action='store_true', dest='question', default=False, help = 'show this help message and exit' )
   parser.add_option( '-c', '--count', action='store_true', dest='count', default=False, help = 'show data set entry count' )
   parser.add_option( '-l', '--list', action='store_true', dest='list', default=False, help = 'list data set entries' )
-  parser.add_option( '-p', '--precision', type='int', dest='precision', default=4, help = 'define precision, i.e. 3 or 4 digits' )
+  parser.add_option( '-p', '--precision', type='int', dest='precision', default=3, help = 'define precision, i.e. 3 or 4 digits' )
   #parser.add_option( '-q', '--quiet', action='store_true', dest='quiet', help = 'reduce verbosity' )
 
   (options, args) = parser.parse_args()
@@ -65,10 +69,15 @@ def main():
   if options.question:
     raise SystemExit(parser.print_help() or 1)
 
+  if not options.precision in [3,4]:
+    print "Sorry, I don't know what will happen if you specify a precision different from 3 or 4."
+    print "Well, actually, the only thing that will happen is that you see this message..."
+    raise SystemExit(parser.print_help() or 1)
+
   d2 = {}
 
   for nk in dataset_name_abbreviation_and_property_key:
-    d = get_records(nk)
+    d = get_records(nk,options.precision)
 
     if options.list:
       print "\n{0} ({1}) has {2} entries:".format(
