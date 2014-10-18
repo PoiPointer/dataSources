@@ -2,7 +2,7 @@
 #
 # find_duplicates.py
 #
-# find duplicates in the PoiPointer data sets
+# find duplicates in the PoiPointer data sets in GeoJson files
 #
 # Copyright (C) 2014 Jeremy Tammik, Autodesk Inc.
 #
@@ -32,6 +32,7 @@ def get_dataset_type( record ):
 
 def get_feature_coordinates_string(feature, precision):
   coords = feature['geometry']['coordinates']
+  if not coords: return '<null>'
   length = precision + 3
   sformat = '{0}.{1}'.format( length, precision)
   sformat = '{0:' + sformat + 'f} {1:' + sformat + 'f}'
@@ -64,33 +65,10 @@ def print_dict(d):
     count += n
   print count, 'entries.'
 
-def main():
-  "Read all PoiPointer data records from GeoJson files and list duplicates"
-
-  progname = 'find_duplicates'
-  usage = 'usage: %s [options]' % progname
-  parser = OptionParser( usage, version = progname + ' ' + _version )
-  parser.add_option( '-?', '--question', action='store_true', dest='question', default=False, help = 'show this help message and exit' )
-  parser.add_option( '-c', '--count', action='store_true', dest='count', default=False, help = 'show data set entry count' )
-  parser.add_option( '-l', '--list', action='store_true', dest='list', default=False, help = 'list data set entries' )
-  parser.add_option( '-p', '--precision', type='int', dest='precision', default=3, help = 'define precision, i.e. 3 or 4 digits' )
-  parser.add_option( '-u', '--url', action='store_true', dest='url', default=False, help = 'generate and list URLs to delete' )
-  #parser.add_option( '-q', '--quiet', action='store_true', dest='quiet', help = 'reduce verbosity' )
-
-  (options, args) = parser.parse_args()
-
-  #print options
-  #print args
-
-  if options.question:
-    raise SystemExit(parser.print_help() or 1)
-
-  if not options.precision in [3,4]:
-    print "Sorry, I don't know what will happen if you specify a precision different from 3 or 4."
-    print "Well, actually, the only thing that will happen is that you see this message..."
-    raise SystemExit(parser.print_help() or 1)
-
-  d2 = {}
+def determine_duplicate_records(d2, options):
+  """Determine duplicate records from dictionary of records.
+  Key is a coordinate string, value is a list. Each list
+  entry is a record _id with its _type in brackets."""
 
   nduplicate_coords = 0
   nduplicate_entries = 0
@@ -98,22 +76,6 @@ def main():
 
   for nk in dataset_name_type_and_property_key:
     nduplicate_entries_per_dataset[nk[1]] = 0
-
-    d = get_records(nk,options.precision)
-
-    if options.list:
-      print "\n{0} ({1}) has {2} entries:".format(
-        nk[0], nk[1], len(d) )
-      print_dict(d)
-
-    elif options.count:
-      print "{0} ({1}) has {2} entries.".format(
-        nk[0], nk[1], len(d) )
-
-    for k,vals in d.items():
-      if not d2.has_key(k): d2[k] = []
-      for v in vals:
-        d2[k].append(v)
 
   duplicate_records = []
   keys = d2.keys()
@@ -165,6 +127,53 @@ def main():
       if 'urb' == k: continue
       for v in d[k]:
         print v.encode('utf-8')
+
+def main():
+  "Read all PoiPointer data records from GeoJson files and list duplicates"
+
+  progname = 'find_duplicates'
+  usage = 'usage: %s [options]' % progname
+  parser = OptionParser( usage, version = progname + ' ' + _version )
+  parser.add_option( '-?', '--question', action='store_true', dest='question', default=False, help = 'show this help message and exit' )
+  parser.add_option( '-c', '--count', action='store_true', dest='count', default=False, help = 'show data set entry count' )
+  parser.add_option( '-l', '--list', action='store_true', dest='list', default=False, help = 'list data set entries' )
+  parser.add_option( '-p', '--precision', type='int', dest='precision', default=3, help = 'define precision, i.e. 3 or 4 digits' )
+  parser.add_option( '-u', '--url', action='store_true', dest='url', default=False, help = 'generate and list URLs to delete' )
+  #parser.add_option( '-q', '--quiet', action='store_true', dest='quiet', help = 'reduce verbosity' )
+
+  (options, args) = parser.parse_args()
+
+  #print options
+  #print args
+
+  if options.question:
+    raise SystemExit(parser.print_help() or 1)
+
+  if not options.precision in [3,4]:
+    print "Sorry, I don't know what will happen if you specify a precision different from 3 or 4."
+    print "Well, actually, the only thing that will happen is that you see this message..."
+    raise SystemExit(parser.print_help() or 1)
+
+  d2 = {}
+
+  for nk in dataset_name_type_and_property_key:
+    d = get_records(nk,options.precision)
+
+    if options.list:
+      print "\n{0} ({1}) has {2} entries:".format(
+        nk[0], nk[1], len(d) )
+      print_dict(d)
+
+    elif options.count:
+      print "{0} ({1}) has {2} entries.".format(
+        nk[0], nk[1], len(d) )
+
+    for k,vals in d.items():
+      if not d2.has_key(k): d2[k] = []
+      for v in vals:
+        d2[k].append(v)
+
+  determine_duplicate_records(d2,options)
 
 if __name__ == "__main__":
   main()
