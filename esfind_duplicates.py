@@ -15,8 +15,29 @@ from find_duplicates import *
 
 _version = '1.0'
 
+def get_poipointer_data_from_elastic_search(options):
+  "Read all PoiPointer data records from PoiPointer ElasticSearch database"
+  d2 = {}
+  r = requests.get('http://192.168.5.186:9200/poipointer/_search?size=1000')
+  #print r
+  j = json.loads(r.content)
+  #print j
+  hits = j['hits']['hits']
+  print len(hits), 'entries found in ElasticSearch.'
+  for h in hits:
+    t = h['_type'].lower().replace('comicbookroute','comic').replace('heritage','')
+    i = h['_id']
+    coords = get_feature_coordinates_string(h['_source'], options.precision)
+    #print coords, h['_type'], h['_id']
+    if not d2.has_key(coords): d2[coords] = []
+    d2[coords].append( '{0} {{{1}}}'.format( i, t ) )
+  return d2
+
 def main():
-  "Read all PoiPointer data records from PoiPOinter ElasicSearch database and list duplicates"
+  "Read all PoiPointer data records from PoiPointer ElasticSearch database and list duplicates"
+
+  print 'esfind_duplicates is obsolete now.\nUse find_duplicates.py -e instead. Bye.'
+  exit(1)
 
   progname = 'esfind_duplicates'
   usage = 'usage: %s [options]' % progname
@@ -41,21 +62,7 @@ def main():
     print "Well, actually, the only thing that will happen is that you see this message..."
     raise SystemExit(parser.print_help() or 1)
 
-  d2 = {}
-
-  r = requests.get('http://192.168.5.186:9200/poipointer/_search?size=1000')
-  #print r
-  j = json.loads(r.content)
-  #print j
-  hits = j['hits']['hits']
-  print len(hits), 'entries found in ElasticSearch.'
-  for h in hits:
-    t = h['_type'].lower().replace('comicbookroute','comic').replace('heritage','')
-    i = h['_id']
-    coords = get_feature_coordinates_string(h['_source'], options.precision)
-    #print coords, h['_type'], h['_id']
-    if not d2.has_key(coords): d2[coords] = []
-    d2[coords].append( '{0} {{{1}}}'.format( i, t ) )
+  d2 = get_poipointer_data_from_elastic_search(options)
 
   determine_duplicate_records(d2,options)
 
