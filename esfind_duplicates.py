@@ -51,7 +51,7 @@ def main():
   print len(hits), 'entries found in ElasticSearch.'
   for h in hits:
     t = h['_type'].lower().replace('comicbookroute','comic').replace('heritage','')
-    i = h['_id'],
+    i = h['_id']
     coords = get_feature_coordinates_string(h['_source'], options.precision)
     #print coords, h['_type'], h['_id']
     if not d2.has_key(coords): d2[coords] = []
