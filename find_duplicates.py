@@ -7,7 +7,10 @@
 # Copyright (C) 2014 Jeremy Tammik, Autodesk Inc.
 #
 from __future__ import unicode_literals
+from optparse import OptionParser
 import json
+
+_version = '1.0'
 
 dataset_name_abbreviation_and_property_key = [
   ['art-heritage-of-regional-roads-fountains0', 'fountain', 'fr_name'],
@@ -23,17 +26,6 @@ def get_feature_coordinates_string(feature):
   coords = feature['geometry']['coordinates']
   return "{0:7.3f} {1:7.3f}".format(coords[0], coords[1])
 
-#def get_records_1(filename, abbreviation, property_key):
-#  with open(filename) as json_file:
-#    json_data = json.load(json_file)
-#  records = {}
-#  for row in json_data['features']:
-#    coords = get_feature_coordinates_string(row)
-#    records[coords] = "%s (%s)".format(
-#      row['properties'][property_key],
-#      abbreviation)
-#  return records
-
 def get_records( name_abbreviation_and_property_key ):
   [name,abbr,key]=name_abbreviation_and_property_key
   filename = name + '.geojson'
@@ -47,9 +39,6 @@ def get_records( name_abbreviation_and_property_key ):
       row['properties'][key], abbr)
   return records
 
-#def get_urbis_records():
-#  return get_records(dataset_name_and_property_key[-1])
-
 def print_dict(d):
   keys = d.keys()
   keys.sort()
@@ -59,12 +48,32 @@ def print_dict(d):
 def main():
   "Read all PoiPointer data records and list duplicates"
 
+  progname = 'find_duplicates'
+  usage = 'usage: %s [options]' % progname
+  parser = OptionParser( usage, version = progname + ' ' + _version )
+  parser.add_option( '-?', '--question', action='store_true', dest='question', default=False, help = 'show this help message and exit' )
+  parser.add_option( '-c', '--count', action='store_true', dest='count', default=False, help = 'show data set entry count' )
+  parser.add_option( '-l', '--list', action='store_true', dest='list', default=False, help = 'list data set entries' )
+  parser.add_option( '-p', '--precision', type='int', dest='precision', default=4, help = 'define precision, i.e. 3 or 4 digits' )
+  #parser.add_option( '-q', '--quiet', action='store_true', dest='quiet', help = 'reduce verbosity' )
+
+  (options, args) = parser.parse_args()
+
+  print options
+  print args
+
+  if options.question:
+    raise SystemExit(parser.print_help() or 1)
+
   d2 = {}
 
   for nk in dataset_name_abbreviation_and_property_key:
     d = get_records(nk)
-    #print '\n\n' + nk[0] + ':'
-    #print_dict(d)
+
+    if options.list:
+      print '\n\n' + nk[0] + ':'
+      print_dict(d)
+
     for k,v in d.items():
       if d2.has_key(k):
         d2[k].append(v)
