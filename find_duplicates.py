@@ -59,8 +59,8 @@ def main():
 
   (options, args) = parser.parse_args()
 
-  print options
-  print args
+  #print options
+  #print args
 
   if options.question:
     raise SystemExit(parser.print_help() or 1)
@@ -71,8 +71,13 @@ def main():
     d = get_records(nk)
 
     if options.list:
-      print '\n\n' + nk[0] + ':'
+      print "\n{0} ({1}) has {2} entries:".format(
+        nk[0], nk[1], len(d) )
       print_dict(d)
+
+    elif options.count:
+      print "{0} ({1}) has {2} entries.".format(
+        nk[0], nk[1], len(d) )
 
     for k,v in d.items():
       if d2.has_key(k):
@@ -80,7 +85,7 @@ def main():
       else:
         d2[k] = [v]
 
-  print 'Duplicate PoiPointer records:'
+  print '\nDuplicate PoiPointer records:'
 
   keys = d2.keys()
   keys.sort()
