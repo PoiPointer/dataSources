@@ -65,7 +65,7 @@ def print_dict(d):
   print count, 'entries.'
 
 def main():
-  "Read all PoiPointer data records and list duplicates"
+  "Read all PoiPointer data records from GeoJson files and list duplicates"
 
   progname = 'find_duplicates'
   usage = 'usage: %s [options]' % progname
@@ -146,13 +146,25 @@ def main():
   print
 
   if options.url:
+    d = {a[1]: [] for a in
+      dataset_name_type_and_property_key}
     for a in duplicate_records:
       for val in a[2]:
         typ = get_dataset_type(val)
         rid = val.replace( '{'+typ+'}', '' )
-        if 'urb' == typ: typ = 'culturalplace'
-        print "http://192.168.5.186:9200/poipointer/{0}/{1}".format(
-          typ, rid ).encode('utf-8')
+        typ2 = typ
+        if 'urb' == typ: typ2 = 'culturalplace'
+        d[typ].append(
+          "http://192.168.5.186:9200/poipointer/{0}/{1}".format(
+            typ2, rid ))
+    for v in d['urb']:
+      print v.encode('utf-8')
+    keys = d.keys()
+    keys.sort()
+    for k in keys:
+      if 'urb' == k: continue
+      for v in d[k]:
+        print v.encode('utf-8')
 
 if __name__ == "__main__":
   main()
