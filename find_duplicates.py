@@ -9,36 +9,46 @@
 from __future__ import unicode_literals
 import json
 
-dataset_name_and_property_key = [
-  ['art-heritage-of-regional-roads-fountains0','fr_name'],
-  ['art-heritage-of-regional-roads-monuments','fr_name'],
-  ['comic-book-route','character_author'],
-  ['cultural-places','cultural_place'],
-  ['museums0','museum'],
-  ['theatres','description'],
-  ['urbis_2d_map_zipoint_zones_of_interest_cu_culture','TXT_FRE']
+dataset_name_abbreviation_and_property_key = [
+  ['art-heritage-of-regional-roads-fountains0', 'fountain', 'fr_name'],
+  ['art-heritage-of-regional-roads-monuments', 'monument', 'fr_name'],
+  ['comic-book-route', 'bd', 'character_author'],
+  ['cultural-places', 'cp', 'cultural_place'],
+  ['museums0', 'museum', 'museum'],
+  ['theatres', 'theatre', 'description'],
+  ['urbis_2d_map_zipoint_zones_of_interest_cu_culture', 'urb', 'TXT_FRE']
 ]
 
 def get_feature_coordinates_string(feature):
   coords = feature['geometry']['coordinates']
-  return "{0:7.4f} {1:7.4f}".format(coords[0], coords[1])
+  return "{0:7.3f} {1:7.3f}".format(coords[0], coords[1])
 
-def get_records_1(filename,property_key):
+#def get_records_1(filename, abbreviation, property_key):
+#  with open(filename) as json_file:
+#    json_data = json.load(json_file)
+#  records = {}
+#  for row in json_data['features']:
+#    coords = get_feature_coordinates_string(row)
+#    records[coords] = "%s (%s)".format(
+#      row['properties'][property_key],
+#      abbreviation)
+#  return records
+
+def get_records( name_abbreviation_and_property_key ):
+  [name,abbr,key]=name_abbreviation_and_property_key
+  filename = name + '.geojson'
+  #return get_records_1(filename,abbr,key)
   with open(filename) as json_file:
     json_data = json.load(json_file)
   records = {}
   for row in json_data['features']:
     coords = get_feature_coordinates_string(row)
-    records[coords] = row['properties'][property_key]
+    records[coords] = "{0} ({1})".format(
+      row['properties'][key], abbr)
   return records
 
-def get_records(name_and_property_key):
-  [name,key]=name_and_property_key
-  filename = name + '.geojson'
-  return get_records_1(filename,key)
-
-def get_urbis_records():
-  return get_records(dataset_name_and_property_key[-1])
+#def get_urbis_records():
+#  return get_records(dataset_name_and_property_key[-1])
 
 def print_dict(d):
   keys = d.keys()
@@ -51,7 +61,7 @@ def main():
 
   d2 = {}
 
-  for nk in dataset_name_and_property_key:
+  for nk in dataset_name_abbreviation_and_property_key:
     d = get_records(nk)
     #print '\n\n' + nk[0] + ':'
     #print_dict(d)
@@ -69,7 +79,8 @@ def main():
     vals = d2[k]
     n = len(vals)
     if 1 < n:
-      print k + ':', n, ", ".join(vals)
+      s = "{0}: {1} {2}".format( k, n, ", ".join(vals))
+      print s.encode('utf-8')
 
 if __name__ == "__main__":
   main()
