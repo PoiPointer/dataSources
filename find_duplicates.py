@@ -12,23 +12,23 @@ import json
 
 _version = '1.0'
 
-dataset_name_abbreviation_and_property_key = [
+dataset_name_type_and_property_key = [
   ['art-heritage-of-regional-roads-fountains0', 'fountain', 'fr_name'],
   ['art-heritage-of-regional-roads-monuments', 'monument', 'fr_name'],
-  ['comic-book-route', 'bd', 'character_author'],
-  ['cultural-places', 'cp', 'cultural_place'],
+  ['comic-book-route', 'comic', 'character_author'],
+  ['cultural-places', 'culturalplace', 'cultural_place'],
   ['museums0', 'museum', 'museum'],
   ['theatres', 'theatre', 'description'],
   ['urbis_2d_map_zipoint_zones_of_interest_cu_culture', 'urb', 'TXT_FRE']
 ]
 
-def get_data_set_abbreviation( record ):
-  "Extract the data set abbreviation from a record."
+def get_dataset_type( record ):
+  "Extract the data set type from a record."
   i = record.index( '{' )
   j = record.index('}')
-  abbr = record[i+1:j]
-  #print abbr, record
-  return abbr
+  typ = record[i+1:j]
+  #print typ, record
+  return typ
 
 def get_feature_coordinates_string(feature, precision):
   coords = feature['geometry']['coordinates']
@@ -38,24 +38,31 @@ def get_feature_coordinates_string(feature, precision):
   #print sformat
   return sformat.format(coords[0], coords[1])
 
-def get_records( name_abbreviation_and_property_key, precision ):
-  [name,abbr,key]=name_abbreviation_and_property_key
+def get_records( name_type_and_property_key, precision ):
+  [name,typ,key]=name_type_and_property_key
   filename = name + '.geojson'
-  #return get_records_1(filename,abbr,key)
+  #return get_records_1(filename,typ,key)
   with open(filename) as json_file:
     json_data = json.load(json_file)
   records = {}
+  #print name, len(json_data['features'])
   for row in json_data['features']:
     coords = get_feature_coordinates_string(row,precision)
-    records[coords] = "{0} {{{1}}}".format(
-      row['properties'][key], abbr)
+    if not records.has_key(coords): records[coords]=[]
+    records[coords].append( "{0} {{{1}}}".format(
+      row['properties'][key], typ))
   return records
 
 def print_dict(d):
   keys = d.keys()
   keys.sort()
+  count = 0
   for k in keys:
-    print k, d[k]
+    n = len(d[k])
+    if 1 == n: print k, ", ".join(d[k])
+    else: print k, n, ", ".join(d[k])
+    count += n
+  print count, 'entries.'
 
 def main():
   "Read all PoiPointer data records and list duplicates"
@@ -67,6 +74,7 @@ def main():
   parser.add_option( '-c', '--count', action='store_true', dest='count', default=False, help = 'show data set entry count' )
   parser.add_option( '-l', '--list', action='store_true', dest='list', default=False, help = 'list data set entries' )
   parser.add_option( '-p', '--precision', type='int', dest='precision', default=3, help = 'define precision, i.e. 3 or 4 digits' )
+  parser.add_option( '-u', '--url', action='store_true', dest='url', default=False, help = 'generate and list URLs to delete' )
   #parser.add_option( '-q', '--quiet', action='store_true', dest='quiet', help = 'reduce verbosity' )
 
   (options, args) = parser.parse_args()
@@ -86,10 +94,10 @@ def main():
 
   nduplicate_coords = 0
   nduplicate_entries = 0
-  nduplicate_entries_per_data_set = {}
+  nduplicate_entries_per_dataset = {}
 
-  for nk in dataset_name_abbreviation_and_property_key:
-    nduplicate_entries_per_data_set[nk[1]] = 0
+  for nk in dataset_name_type_and_property_key:
+    nduplicate_entries_per_dataset[nk[1]] = 0
 
     d = get_records(nk,options.precision)
 
@@ -102,14 +110,12 @@ def main():
       print "{0} ({1}) has {2} entries.".format(
         nk[0], nk[1], len(d) )
 
-    for k,v in d.items():
-      if d2.has_key(k):
+    for k,vals in d.items():
+      if not d2.has_key(k): d2[k] = []
+      for v in vals:
         d2[k].append(v)
-      else:
-        d2[k] = [v]
 
-  print '\nDuplicate PoiPointer records:'
-
+  duplicate_records = []
   keys = d2.keys()
   keys.sort()
   for k in keys:
@@ -119,19 +125,34 @@ def main():
       nduplicate_coords += 1
       nduplicate_entries += n
       for v in vals:
-        nduplicate_entries_per_data_set[
-          get_data_set_abbreviation(v)] += 1
-      s = "{0}: {1} {2}".format( k, n, ", ".join(vals))
-      print s.encode('utf-8')
+        nduplicate_entries_per_dataset[
+          get_dataset_type(v)] += 1
+      duplicate_records.append([k,n,vals])
 
-  if options.list or options.count:
-    print "\n{0} duplicate coordinates with {1} duplicate entries:".format(
-      nduplicate_coords, nduplicate_entries )
-    keys = nduplicate_entries_per_data_set.keys()
-    keys.sort()
-    for k in keys:
-      print "{0:4d} duplicates in {1}".format(
-        nduplicate_entries_per_data_set[k], k )
+  print '\n{0} duplicate PoiPointer records:'.format(
+    len(duplicate_records))
+
+  for a in duplicate_records:
+    s = "{0}: {1} {2}".format( a[0], a[1], ", ".join(a[2]))
+    print s.encode('utf-8')
+
+  print "\n{0} duplicate coordinates with {1} duplicate entries:".format(
+    nduplicate_coords, nduplicate_entries )
+  keys = nduplicate_entries_per_dataset.keys()
+  keys.sort()
+  for k in keys:
+    print "{0:4d} duplicates in {1}".format(
+      nduplicate_entries_per_dataset[k], k )
+  print
+
+  if options.url:
+    for a in duplicate_records:
+      for val in a[2]:
+        typ = get_dataset_type(val)
+        rid = val.replace( '{'+typ+'}', '' )
+        if 'urb' == typ: typ = 'culturalplace'
+        print "http://192.168.5.186:9200/poipointer/{0}/{1}".format(
+          typ, rid ).encode('utf-8')
 
 if __name__ == "__main__":
   main()
